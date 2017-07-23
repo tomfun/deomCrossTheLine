@@ -164,38 +164,40 @@ function redrawControls() {
             {key}
             <input name={key} type="number" min="0" step="0.01" value={calcData[key]} onChange={overallHandler}/>
         </lebel>))}
-        <br/>
-        <table>
-            <tbody>
-            {['omega', 'beta', 'alphaMax', 'alphaMin', 'sinMax', 'sinMin'].map(key => (<tr>
-                <td>{key}</td>
-                <td>{calcData[key]}</td>
-            </tr>))}
-            <tr>
-                <td>assume human speed is</td>
-                <td>4 (km or miles)</td>
-            </tr>
-            <tr>
-                <td>then car speed is</td>
-                <td>{(4 * calcData.omega).toFixed(1)} (km or miles)</td>
-            </tr>
-            <tr>
-                <td>assume car size is</td>
-                <td>2.5 meters OR 6.56 foots</td>
-            </tr>
-            <tr>
-                <td>then distance is</td>
-                <td>{(2.5 * calcData.beta).toFixed(1)} meters OR {(3.28084 * 2.5 * calcData.beta).toFixed(0)} foots</td>
-            </tr>
-            <tr>
-                <td>chances to successive cross the road</td>
-                <td>{(100 * (calcData.alphaMax - calcData.alphaMin) / (calcData.alphaMax + calcData.alphaMin)).toFixed(0)}
-                    %
-                </td>
-            </tr>
-            </tbody>
-        </table>
     </div>);
+}
+
+function redrawInfoTable() {
+    return (<table>
+        <tbody>
+        {['omega', 'beta', 'alphaMax', 'alphaMin', 'sinMax', 'sinMin'].map(key => (<tr>
+            <td>{key}</td>
+            <td>{calcData[key]}</td>
+        </tr>))}
+        <tr>
+            <td>assume human speed is</td>
+            <td>4 (km or miles)</td>
+        </tr>
+        <tr>
+            <td>then car speed is</td>
+            <td>{(4 * calcData.omega).toFixed(1)} (km or miles)</td>
+        </tr>
+        <tr>
+            <td>assume car size is</td>
+            <td>2.5 meters OR 6.56 foots</td>
+        </tr>
+        <tr>
+            <td>then distance is</td>
+            <td>{(2.5 * calcData.beta).toFixed(1)} meters OR {(3.28084 * 2.5 * calcData.beta).toFixed(0)} foots</td>
+        </tr>
+        <tr>
+            <td>chances to successive cross the road</td>
+            <td>{(100 * (calcData.alphaMax - calcData.alphaMin) / (calcData.alphaMax + calcData.alphaMin)).toFixed(0)}
+                %
+            </td>
+        </tr>
+        </tbody>
+    </table>);
 }
 
 const reactRoot = document.getElementById('application');
@@ -208,6 +210,10 @@ function redrawAll() {
             </div>
             <div>
                 {redrawScheme(calcObject(calcData))}
+            </div>
+            <img src="car.svg" width="100" />
+            <div>
+                {redrawInfoTable()}
             </div>
         </div>),
         reactRoot

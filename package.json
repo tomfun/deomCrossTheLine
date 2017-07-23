@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack -w",
+    "build-prod": "NODE_ENV=production webpack",
+    "start": "docker-compose up -d && sensible-browser http://localhost:8001/ && npm run build"
   },
   "author": "",
   "license": "ISC",

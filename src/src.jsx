@@ -35,7 +35,12 @@ function drawArrow(length) {
     ];
     const join = (arr, glue) => arr.map(a => a.join(' ')).join(glue);
     const d = `M ${join(points.slice(0, 1), '')} L ${join(points.slice(1), 'L ')} Z`;
-    return (<path d={d}/>);
+    return (<g>
+        <text x="0" y="-5" fontFamily="Verdana" fontSize="22">
+            speed
+        </text>
+        <path d={d}/>
+    </g>);
 }
 
 /**
@@ -43,7 +48,9 @@ function drawArrow(length) {
  */
 function redrawScheme(figure) {
     const offsetY = (svgHeight - figure.rectHeight) / 2;
-    const triangleData = `M ${figure.rectWidth} ${figure.rectHeight + offsetY} l ${figure.triangleSideMin} ${-figure.rectHeight} l ${-figure.triangleSideMin + figure.triangleSideMax} 0 Z`;
+    const triangleSafeData = `M ${figure.rectWidth} ${figure.rectHeight + offsetY} l ${figure.triangleSideMin} ${-figure.rectHeight} l ${-figure.triangleSideMin + figure.triangleSideMax} 0 Z`;
+    const triangleBad1Data = `M 0 ${figure.rectHeight + offsetY} l ${figure.rectWidth} 0 l ${figure.triangleSideMin} ${-figure.rectHeight} L 0 ${offsetY} Z`;
+    const triangleBad2Data = `M ${figure.rectWidth} ${figure.rectHeight + offsetY} l ${figure.triangleSideMax} ${-figure.rectHeight} l ${svgWidth} 0 l 0 ${figure.rectHeight} Z`;
     const rectData = {
         x: 0,
         y: offsetY,
@@ -54,8 +61,12 @@ function redrawScheme(figure) {
         <svg width={svgWidth} height={svgHeight} style={{padding: '5px'}}>
             <rect x={rectData.x} y={rectData.y} width={rectData.width} height={rectData.height}
                   style={{fill: 'blue', stroke: 'grey', strokeWidth: 3, fillOpacity: 0.1, strokeOpacity: 0.2}}/>
-            <path d={triangleData}
+            <path d={triangleSafeData}
                   style={{fill: 'green', stroke: 'red', strokeWidth: 3, fillOpacity: 0.3, strokeOpacity: 0.2}}/>
+            <path d={triangleBad1Data}
+                  style={{fill: 'red', stroke: 'red', strokeWidth: 3, fillOpacity: 0.1, strokeOpacity: 0.1}}/>
+            <path d={triangleBad2Data}
+                  style={{fill: 'red', stroke: 'red', strokeWidth: 3, fillOpacity: 0.1, strokeOpacity: 0.1}}/>
             <g
                 stroke="red"
                 transform={`translate(0 ${svgHeight / 2})`}>
@@ -66,12 +77,24 @@ function redrawScheme(figure) {
                 transform={`rotate(-90, ${figure.rectWidth}, ${svgHeight}) translate(${figure.rectWidth} ${svgHeight})`}>
                 {drawArrow(figure.Vp)}
             </g>
+            <g transform={`scale (0.3) translate(0 ${svgHeight * 2.2})`}>
+                <g
+                    stroke="red"
+                    transform={`translate(0 ${svgHeight})`}>
+                    {drawArrow(figure.Vm)}
+                </g>
+                <g
+                    stroke="blue"
+                    transform={`rotate(-90, 0, ${svgHeight}) translate(0 ${svgHeight})`}>
+                    {drawArrow(figure.Vp)}
+                </g>
+            </g>
         </svg>
     );
 }
 
 function calcAlphas(omega, beta) {
-    const sd = beta * Math.sqrt(beta * beta + 1 -  omega * omega);
+    const sd = beta * Math.sqrt(beta * beta + 1 - omega * omega);
     const alpha1 = (omega + sd) / (1 + beta * beta);
     const alpha2 = (omega - sd) / (1 + beta * beta);
     const sin = {
@@ -120,7 +143,7 @@ function calcObject({omega, beta, alphaMin, alphaMax}) {
     }
 }
 
-const calcData = {omega: 2, beta: 2, alphaMax: 	2.498091544796509, alphaMin: Math.PI / 2};
+const calcData = {omega: 2, beta: 2, alphaMax: 2.498091544796509, alphaMin: Math.PI / 2};
 console.log('----', calcData)
 console.log(calcObject(calcData))
 console.log('----')
@@ -134,12 +157,42 @@ function redrawControls() {
     return (<div>
         {['omega', 'beta'].map(key => (<lebel>
             {key}
-            <input name={key} type="range" min="0" step="0.01" value={calcData[key]} onChange={overallHandler}/>
+            <input name={key} type="range" min="0" step="0.1" value={calcData[key]} onChange={overallHandler}/>
+        </lebel>))}
+        <br/>
+        {['omega', 'beta'].map(key => (<lebel>
+            {key}
+            <input name={key} type="number" min="0" step="0.01" value={calcData[key]} onChange={overallHandler}/>
         </lebel>))}
         <br/>
         <table>
             <tbody>
-            {['omega', 'beta', 'alphaMax', 'alphaMin', 'sinMax', 'sinMin'].map(key => (<tr><td>{key}</td><td>{calcData[key]}</td></tr>))}
+            {['omega', 'beta', 'alphaMax', 'alphaMin', 'sinMax', 'sinMin'].map(key => (<tr>
+                <td>{key}</td>
+                <td>{calcData[key]}</td>
+            </tr>))}
+            <tr>
+                <td>assume human speed is</td>
+                <td>4 (km or miles)</td>
+            </tr>
+            <tr>
+                <td>then car speed is</td>
+                <td>{(4 * calcData.omega).toFixed(1)} (km or miles)</td>
+            </tr>
+            <tr>
+                <td>assume car size is</td>
+                <td>2.5 meters OR 6.56 foots</td>
+            </tr>
+            <tr>
+                <td>then distance is</td>
+                <td>{(2.5 * calcData.beta).toFixed(1)} meters OR {(3.28084 * 2.5 * calcData.beta).toFixed(0)} foots</td>
+            </tr>
+            <tr>
+                <td>chances to successive cross the road</td>
+                <td>{(100 * (calcData.alphaMax - calcData.alphaMin) / (calcData.alphaMax + calcData.alphaMin)).toFixed(0)}
+                    %
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>);
